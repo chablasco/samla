@@ -139,6 +139,10 @@
   const root = document.documentElement;
   const top = $('.top');
   const onScroll = () => { if (top) top.classList.toggle('scrolled', window.scrollY > 8); };
+  // The header's height, so pictures on phones can fill exactly the rest of the screen
+  const setTopH = () => { if (top) root.style.setProperty('--top-h', top.offsetHeight + 'px'); };
+  setTopH();
+  window.addEventListener('resize', setTopH);
   onScroll();
 
   if (root.classList.contains('motion')) {

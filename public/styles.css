@@ -269,7 +269,8 @@ dialog p { color: var(--muted); }
 @media (max-width: 700px) {
   .top { grid-template-columns: 1fr auto; }
   .nav { grid-column: 1 / -1; grid-row: 2; margin: -6px 0 -8px -8px; }
-  .tag { display: none; }
+  .brand { column-gap: 8px; }
+  .tag { font-size: 13px; }
   .footer { flex-direction: column; }
 }
 @media (max-width: 600px) {
@@ -277,6 +278,8 @@ dialog p { color: var(--muted); }
   .row3 .field:first-child { grid-column: 1 / -1; }
   .copy-row { flex-direction: column; align-items: stretch; }
   .cover { margin: 0 calc(-1 * var(--pad)); }
+  /* On phones the picture fills the screen below the header */
+  .visual .cover { aspect-ratio: auto; height: calc(100svh - var(--top-h, 100px)); min-height: 380px; }
   .mine li a, .mine li.gone { grid-template-columns: 5.2em minmax(0, 1fr) auto; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } html { scroll-behavior: auto; } }
