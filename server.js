@@ -213,7 +213,7 @@ function layout({ title, page, body, head = '' }) {
 <meta name="application-name" content="${esc(SITE)}">
 <meta name="theme-color" content="#00874c">
 <script src="/static/theme.js?v=2"></script>
-<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/static/icon.svg?v=3" type="image/svg+xml">
 <link rel="preload" href="/static/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/static/styles.css?v=2">
 ${head}
