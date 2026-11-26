@@ -162,6 +162,9 @@ function fmtDate(date) {
   return {
     long: new Intl.DateTimeFormat('en-GB', opts).format(dt),
     mon: new Intl.DateTimeFormat('en-GB', { month: 'short', timeZone: 'UTC' }).format(dt),
+    month: new Intl.DateTimeFormat('en-GB', { month: 'long', timeZone: 'UTC' }).format(dt),
+    weekday: new Intl.DateTimeFormat('en-GB', { weekday: 'long', timeZone: 'UTC' }).format(dt),
+    year: y,
     day: d,
   };
 }
@@ -223,7 +226,7 @@ function layout({ title, page, body, head = '' }) {
 <script src="/static/theme.js?v=2"></script>
 <link rel="icon" href="/static/icon.svg?v=3" type="image/svg+xml">
 <link rel="preload" href="/static/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/styles.css?v=2">
+<link rel="stylesheet" href="/static/styles.css?v=3">
 ${head}
 </head>
 <body data-page="${page}">
@@ -232,7 +235,10 @@ ${head}
   <nav class="tools"><a href="/about">How it works</a>${THEME_BTN}</nav>
 </header>
 ${body}
-<footer class="footer"><span>${esc(SITE)}${CREDIT ? ' · ' + creditHTML() : ''}</span><span>No tracking, no cookies, no ads.</span><a href="/about#privacy">What is stored</a></footer>
+<footer class="footer">
+  <div class="foot-row"><span>${esc(SITE)}${CREDIT ? ' · ' + creditHTML() : ''}</span><span>No tracking, no cookies, no ads.</span><a href="/about#privacy">What is stored</a></div>
+  <div class="giant" aria-hidden="true">${esc(SITE_SHORT)}</div>
+</footer>
 <script src="/static/app.js?v=2" defer></script>
 </body>
 </html>`;
@@ -244,7 +250,7 @@ function formHTML(ev) {
   const editing = !!ev;
   return `<form class="ev-form" data-mode="${editing ? 'edit' : 'create'}"${editing ? ` data-id="${esc(e.id)}"` : ''}>
   <input class="sr" id="f-image" type="file" accept="image/*">
-  <label class="drop${e.image ? ' has' : ''}" for="f-image">
+  <label class="drop${e.image ? ' has' : ''}" for="f-image">${MARKS}
     <img alt=""${e.image ? ` src="/img/${esc(e.image.file)}"` : ''}>
     <span class="drop-empty">${ICON.img}<b>Add a picture</b><small>Drop an image here, or tap to choose one</small></span>
     <span class="drop-change">Change picture</span>
@@ -269,20 +275,25 @@ function formHTML(ev) {
 </form>`;
 }
 
+const MARKS = '<i class="cm tl"></i><i class="cm tr"></i><i class="cm bl"></i><i class="cm br"></i>';
+
 function eventCard(ev, url) {
   const d = fmtDate(ev.date);
   const time = fmtTime(ev);
   const cover = ev.image
-    ? `<div class="cover"><img src="/img/${esc(ev.image.file)}" alt=""></div>`
-    : `<div class="cover fb fb${hash(ev.id) % 5}" aria-hidden="true"><span>${d.day}</span></div>`;
+    ? `<figure class="cover">${MARKS}<img src="/img/${esc(ev.image.file)}" alt=""></figure>`
+    : `<figure class="cover fb fb${hash(ev.id) % 5}" aria-hidden="true">${MARKS}<span class="fb-top"><b>${esc(d.month)}</b>${esc(d.weekday)}</span><span class="fb-yr">${d.year}</span><span class="fb-num">${d.day}</span></figure>`;
+  const map = ev.place ? `<a href="https://www.google.com/maps/search/?api=1&amp;query=${encodeURIComponent(ev.place)}" rel="noopener" target="_blank">${esc(ev.place)}</a>` : '';
   return `<article class="event">
   ${cover}
   <div class="info">
-    <div class="when"><div class="stub"><span>${esc(d.mon)}</span><b>${d.day}</b></div>
-      <div><p class="date">${esc(d.long)}</p>${time ? `<p class="time">${esc(time)}</p>` : ''}</div></div>
-    <h1>${esc(ev.title)}</h1>
-    ${ev.hostName ? `<p class="hostby">Hosted by ${esc(ev.hostName)}</p>` : ''}
-    ${ev.place ? `<p class="place">${ICON.pin}<a href="https://www.google.com/maps/search/?api=1&amp;query=${encodeURIComponent(ev.place)}" rel="noopener" target="_blank">${esc(ev.place)}</a></p>` : ''}
+    <h1 class="title">${esc(ev.title)}</h1>
+    <dl class="meta">
+      <div class="m-date"><dt>Date</dt><dd><b>${d.day} ${esc(d.mon)}</b><span>${esc(d.long)}</span></dd></div>
+      ${time ? `<div><dt>Time</dt><dd>${esc(time)}</dd></div>` : ''}
+      ${ev.place ? `<div class="m-place"><dt>Place</dt><dd>${map}</dd></div>` : ''}
+      ${ev.hostName ? `<div><dt>Host</dt><dd>${esc(ev.hostName)}</dd></div>` : ''}
+    </dl>
     ${ev.description ? `<div class="desc">${esc(ev.description)}</div>` : ''}
     <section id="rsvp" class="rsvp" aria-live="polite"></section>
     <section id="guests" class="guests" hidden></section>
