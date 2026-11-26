@@ -28,24 +28,40 @@
   };
 
   // Resize big photos in the browser before upload
+  // Resize big photos in the browser before upload, and keep them under the size the server accepts
+  const MAX_UPLOAD = 1700 * 1024;
   function resizeImage(file) {
     return new Promise((resolve, reject) => {
       if (!/^image\//.test(file.type)) return reject(new Error('Please choose an image file.'));
       const url = URL.createObjectURL(file);
       const img = new Image();
-      img.onload = () => {
-        const max = 1800;
-        const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
-        const c = document.createElement('canvas');
-        c.width = Math.round(img.naturalWidth * s);
-        c.height = Math.round(img.naturalHeight * s);
-        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      img.onload = async () => {
         URL.revokeObjectURL(url);
-        resolve(c.toDataURL('image/jpeg', 0.86));
+        const toBlob = (c, q) => new Promise((r) => c.toBlob(r, 'image/jpeg', q));
+        let max = 1800, q = 0.85, blob = null;
+        for (let i = 0; i < 6; i++) {
+          const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+          const c = document.createElement('canvas');
+          c.width = Math.round(img.naturalWidth * s);
+          c.height = Math.round(img.naturalHeight * s);
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          blob = await toBlob(c, q);
+          if (blob && blob.size <= MAX_UPLOAD) break;
+          max = Math.round(max * 0.8); q = Math.max(0.6, q - 0.07);
+        }
+        if (!blob || blob.size > MAX_UPLOAD) return reject(new Error('That picture is too large. Try another one.'));
+        resolve(blob);
       };
       img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('That image could not be read. Try a JPEG or PNG.')); };
       img.src = url;
     });
+  }
+
+  async function uploadImage(id, key, blob) {
+    const r = await fetch(`/api/events/${encodeURIComponent(id)}/image`, { method: 'PUT', headers: { 'Content-Type': 'image/jpeg', 'X-Host-Key': key }, body: blob });
+    let data = {};
+    try { data = await r.json(); } catch { /* empty */ }
+    if (!r.ok) throw new Error(data.error || 'The picture could not be saved. Try again.');
   }
 
   function setupForm(form, ctx) {
@@ -60,7 +76,8 @@
       err.textContent = '';
       try {
         imageData = await resizeImage(f);
-        prev.src = imageData;
+        if (prev.dataset.blob) URL.revokeObjectURL(prev.dataset.blob);
+        prev.src = prev.dataset.blob = URL.createObjectURL(imageData);
         drop.classList.add('has');
         removeImage = false;
       } catch (e) { err.textContent = e.message; }
@@ -83,8 +100,7 @@
         place: f.place.value, description: f.description.value, hostName: f.hostName.value,
         showGuests: f.showGuests.checked,
       };
-      if (imageData) body.image = imageData;
-      else if (removeImage) body.removeImage = true;
+      if (!imageData && removeImage) body.removeImage = true;
       const btn = $('button[type=submit]', form);
       const label = btn.textContent;
       btn.disabled = true; btn.textContent = 'Saving…';
@@ -93,9 +109,15 @@
           const r = await api('POST', '/api/events', body);
           hosted.put({ id: r.id, key: r.hostKey, title: body.title, date: body.date });
           if (body.hostName) store.set('samla:name', body.hostName);
+          if (imageData) {
+            btn.textContent = 'Uploading picture…';
+            try { await uploadImage(r.id, r.hostKey, imageData); }
+            catch (ex) { store.set('samla:upload-error', ex.message); }
+          }
           location.href = `/h/${r.id}/${r.hostKey}`;
         } else {
           await api('PUT', `/api/events/${ctx.id}`, body, { 'X-Host-Key': ctx.key });
+          if (imageData) { btn.textContent = 'Uploading picture…'; await uploadImage(ctx.id, ctx.key, imageData); }
           hosted.put({ id: ctx.id, key: ctx.key, title: body.title, date: body.date });
           location.reload();
         }
@@ -310,6 +332,15 @@
     const ev = JSON.parse($('#ev-data').textContent);
     hosted.put({ id: ev.id, key: ev.key, title: ev.title, date: ev.date });
     const hdr = { 'X-Host-Key': ev.key };
+    // If the picture failed to upload while creating the event, say so here
+    const upErr = store.get('samla:upload-error', null);
+    if (upErr) {
+      try { localStorage.removeItem('samla:upload-error'); } catch { /* ignore */ }
+      const p = document.createElement('p');
+      p.className = 'err';
+      p.textContent = `The event was created, but the picture was not saved: ${upErr} Use Edit event to add it again.`;
+      $('.share').prepend(p);
+    }
 
     $$('[data-copy]').forEach((b) => {
       const orig = b.textContent;
