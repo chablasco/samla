@@ -26,7 +26,8 @@ There are two ways:
 
 - **Share your copy:** once it is online, anyone can open the address and create their own events.
   The "How it works" page (`/about`) explains it to both hosts and guests.
-- **Give them their own copy:** send them this folder. They follow "Run it locally" below, and can
+- **Give them their own copy:** they download it from https://github.com/chablasco/samla
+  (green Code button, then Download ZIP). They follow "Run it locally" below, and can
   change the name with `SITE_NAME` and `SITE_CREDIT`.
 
 The font Archivo is included under the SIL Open Font License (`public/fonts/OFL.txt`).
@@ -67,7 +68,7 @@ Settings (environment variables):
 | `BASE_URL` | from request | Public address, e.g. `https://events.chablasco.com` (used in invite links and previews) |
 | `DATA_DIR` | `~/samla-data` | Where events and pictures are stored. Kept outside the app folder so updating the app never loses events |
 | `SITE_NAME` | `samla: the f*ck facebook event app` | Name in page titles. Text before `: ` is shown big in the header, text after it as a tagline |
-| `DOWNLOAD_URL` | none | An https link to the app's files (for example a GitHub page). Shown on the How it works page |
+| `DOWNLOAD_URL` | `https://github.com/chablasco/samla` | An https link to the app's files (for example a GitHub page). Shown on the How it works page |
 | `SITE_CREDIT` | `created by Cha Blasco` | Small line next to the name (set empty to hide) |
 
 ## Put it on your server (Ubuntu + nginx)

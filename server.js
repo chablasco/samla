@@ -17,7 +17,7 @@ const IMG_DIR = path.join(DATA, 'images');
 const PUB = path.join(__dirname, 'public');
 const SITE = process.env.SITE_NAME || 'samla: the f*ck facebook event app';
 const [SITE_SHORT, SITE_TAG] = SITE.includes(': ') ? [SITE.slice(0, SITE.indexOf(': ')), SITE.slice(SITE.indexOf(': ') + 2)] : [SITE, ''];
-const DOWNLOAD_URL = /^https:\/\//.test(process.env.DOWNLOAD_URL || '') ? process.env.DOWNLOAD_URL : '';
+const DOWNLOAD_URL = /^https:\/\//.test(process.env.DOWNLOAD_URL || '') ? process.env.DOWNLOAD_URL : 'https://github.com/chablasco/samla';
 const CREDIT = process.env.SITE_CREDIT ?? 'created by Cha Blasco';
 const SLUG = SITE_SHORT.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'events';
 const MAX_GUESTS = 1000;
@@ -389,7 +389,7 @@ function aboutPage(base) {
   <h2>Do I need to download anything?</h2>
   <p><b>No, not to use it.</b> Hosts and guests only need a web browser and the address of a copy that is online, like this one. Nothing to install, no zip file, no app store.</p>
   <p>You only need the app's files if you want to <b>run your own copy</b>, on your own computer or server.${DOWNLOAD_URL
-    ? ` <a href="${esc(DOWNLOAD_URL)}" rel="noopener">Download the files here.</a>`
+    ? ` <a href="${esc(DOWNLOAD_URL)}" rel="noopener">Download the files on GitHub</a> (green <b>Code</b> button, then <b>Download ZIP</b>).`
     : ' Ask the person who runs this site for the files.'}</p>
 
   <h2>Run your own copy</h2>
