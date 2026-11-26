@@ -19,6 +19,14 @@ const SITE = process.env.SITE_NAME || 'samla: the f*ck facebook event app';
 const [SITE_SHORT, SITE_TAG] = SITE.includes(': ') ? [SITE.slice(0, SITE.indexOf(': ')), SITE.slice(SITE.indexOf(': ') + 2)] : [SITE, ''];
 const DOWNLOAD_URL = /^https:\/\//.test(process.env.DOWNLOAD_URL || '') ? process.env.DOWNLOAD_URL : 'https://github.com/chablasco/samla';
 const CREDIT = process.env.SITE_CREDIT ?? 'created by Cha Blasco';
+const CREDIT_LINK = process.env.SITE_CREDIT_LINK ?? 'Cha Blasco';
+const CREDIT_URL = /^https:\/\//.test(process.env.SITE_CREDIT_URL ?? 'https://chablasco.com') ? (process.env.SITE_CREDIT_URL ?? 'https://chablasco.com') : '';
+// The credit line, with the name linked to the creator's website
+function creditHTML() {
+  const text = esc(CREDIT);
+  if (!CREDIT_URL || !CREDIT_LINK || !CREDIT.includes(CREDIT_LINK)) return text;
+  return text.replace(esc(CREDIT_LINK), `<a href="${esc(CREDIT_URL)}" rel="noopener" target="_blank">${esc(CREDIT_LINK)}</a>`);
+}
 const SLUG = SITE_SHORT.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'events';
 const MAX_GUESTS = 1000;
 
@@ -220,11 +228,11 @@ ${head}
 </head>
 <body data-page="${page}">
 <header class="top">
-  <div class="brand"><span class="name"><a class="mark" href="/" aria-label="${esc(SITE)}">${esc(SITE_SHORT)}</a>${SITE_TAG ? `<span class="tag">${esc(SITE_TAG)}</span>` : ''}</span>${CREDIT ? `<span class="credit">${esc(CREDIT)}</span>` : ''}</div>
+  <div class="brand"><span class="name"><a class="mark" href="/" aria-label="${esc(SITE)}">${esc(SITE_SHORT)}</a>${SITE_TAG ? `<span class="tag">${esc(SITE_TAG)}</span>` : ''}</span>${CREDIT ? `<span class="credit">${creditHTML()}</span>` : ''}</div>
   <nav class="tools"><a href="/about">How it works</a>${THEME_BTN}</nav>
 </header>
 ${body}
-<footer class="footer"><span>${esc(SITE)}${CREDIT ? ' · ' + esc(CREDIT) : ''}</span><span>No tracking, no cookies, no ads.</span><a href="/about#privacy">What is stored</a></footer>
+<footer class="footer"><span>${esc(SITE)}${CREDIT ? ' · ' + creditHTML() : ''}</span><span>No tracking, no cookies, no ads.</span><a href="/about#privacy">What is stored</a></footer>
 <script src="/static/app.js?v=2" defer></script>
 </body>
 </html>`;
@@ -292,7 +300,15 @@ function homePage() {
   <h1 class="page-title">New event</h1>
   <p class="lede">Make the event, send the link to the people you want there, and watch the replies come in. Guests need no account.</p>
   ${formHTML(null)}
-  <section class="mine" hidden><h2>Your events</h2><ul id="mine"></ul><p class="note">Saved in this browser only.</p></section>
+  <section class="mine" hidden>
+    <div class="mine-head"><h2>Your events</h2><button class="btn ghost danger small" type="button" id="del-past" hidden>Delete all past events</button></div>
+    <ul id="mine"></ul>
+    <p class="note">This list is saved in this browser only. Deleting an event removes it, its picture and all replies from the server for good.</p>
+  </section>
+  <dialog id="del-dialog"><form method="dialog">
+    <h2 id="del-title">Delete this event?</h2><p id="del-text">The event, its picture and all replies will be removed. This can't be undone.</p>
+    <div class="actions"><button class="btn ghost" value="cancel">Keep</button><button class="btn primary danger" value="delete">Delete</button></div>
+  </form></dialog>
 </main>`,
   });
 }

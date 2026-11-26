@@ -70,6 +70,9 @@ Settings (environment variables):
 | `SITE_NAME` | `samla: the f*ck facebook event app` | Name in page titles. Text before `: ` is shown big in the header, text after it as a tagline |
 | `DOWNLOAD_URL` | `https://github.com/chablasco/samla` | An https link to the app's files (for example a GitHub page). Shown on the How it works page |
 | `SITE_CREDIT` | `created by Cha Blasco` | Small line next to the name (set empty to hide) |
+| `SITE_CREDIT_LINK` | `Cha Blasco` | The part of the credit line that becomes a link |
+| `SITE_CREDIT_URL` | `https://chablasco.com` | Where that link goes |
+| `SITE_CREDIT_URL` | `https://chablasco.com` | The name after "by " links here (set empty for no link) |
 
 ## Put it on your server (Ubuntu + nginx)
 
