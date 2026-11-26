@@ -30,7 +30,7 @@ There are two ways:
   (green Code button, then Download ZIP). They follow "Run it locally" below, and can
   change the name with `SITE_NAME` and `SITE_CREDIT`.
 
-The font Archivo is included under the SIL Open Font License (`public/fonts/OFL.txt`).
+The font Inter is included under the SIL Open Font License (`public/fonts/OFL.txt`).
 
 ## Do people need to download the zip?
 

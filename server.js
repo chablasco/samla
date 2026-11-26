@@ -199,9 +199,8 @@ function ics(ev, url) {
 
 // ---------- HTML ----------
 const ICON = {
-  pin: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
-  cal: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
-  img: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="m4 18 5.5-5.5 4 4L16 14l4 4"/></svg>',
+  arrow: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
 };
 
 function baseUrl(req) {
@@ -211,8 +210,7 @@ function baseUrl(req) {
 }
 
 const THEME_BTN = `<button class="theme-btn" type="button" aria-label="Switch between light and dark mode" title="Light or dark mode">
-<svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
-<svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg></button>`;
+<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.25"/><path class="half" d="M12 3.75a8.25 8.25 0 0 1 0 16.5Z"/></svg></button>`;
 
 function layout({ title, page, body, head = '' }) {
   return `<!DOCTYPE html>
@@ -222,24 +220,24 @@ function layout({ title, page, body, head = '' }) {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title>
 <meta name="application-name" content="${esc(SITE)}">
-<meta name="theme-color" content="#00874c">
-<script src="/static/theme.js?v=2"></script>
-<link rel="icon" href="/static/icon.svg?v=3" type="image/svg+xml">
-<link rel="preload" href="/static/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/styles.css?v=3">
+<meta name="theme-color" content="#ffd60a">
+<script src="/static/theme.js?v=4"></script>
+<link rel="icon" href="/static/icon.svg?v=4" type="image/svg+xml">
+<link rel="preload" href="/static/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/static/styles.css?v=4">
 ${head}
 </head>
 <body data-page="${page}">
 <header class="top">
-  <div class="brand"><span class="name"><a class="mark" href="/" aria-label="${esc(SITE)}">${esc(SITE_SHORT)}</a>${SITE_TAG ? `<span class="tag">${esc(SITE_TAG)}</span>` : ''}</span>${CREDIT ? `<span class="credit">${creditHTML()}</span>` : ''}</div>
-  <nav class="tools"><a href="/about">How it works</a>${THEME_BTN}</nav>
+  <div class="brand"><a class="mark" href="/" aria-label="${esc(SITE)}">${esc(SITE_SHORT)}</a>${SITE_TAG ? `<span class="tag">${esc(SITE_TAG)}</span>` : ''}</div>
+  <nav class="nav" aria-label="Main"><a href="/"${page === 'home' ? ' aria-current="page"' : ''}>New event</a><a href="/about"${page === 'about' ? ' aria-current="page"' : ''}>How it works</a></nav>
+  <div class="right">${CREDIT ? `<span class="credit">${creditHTML()}</span>` : ''}${THEME_BTN}</div>
 </header>
 ${body}
 <footer class="footer">
-  <div class="foot-row"><span>${esc(SITE)}${CREDIT ? ' · ' + creditHTML() : ''}</span><span>No tracking, no cookies, no ads.</span><a href="/about#privacy">What is stored</a></div>
-  <div class="giant" aria-hidden="true">${esc(SITE_SHORT)}</div>
+  <span>${esc(SITE)}</span><span>No tracking, no cookies, no ads. <a href="/about#privacy">What is stored</a></span>${CREDIT ? `<span>${creditHTML()}</span>` : ''}
 </footer>
-<script src="/static/app.js?v=2" defer></script>
+<script src="/static/app.js?v=4" defer></script>
 </body>
 </html>`;
 }
@@ -250,9 +248,9 @@ function formHTML(ev) {
   const editing = !!ev;
   return `<form class="ev-form" data-mode="${editing ? 'edit' : 'create'}"${editing ? ` data-id="${esc(e.id)}"` : ''}>
   <input class="sr" id="f-image" type="file" accept="image/*">
-  <label class="drop${e.image ? ' has' : ''}" for="f-image">${MARKS}
+  <label class="drop${e.image ? ' has' : ''}" for="f-image">
     <img alt=""${e.image ? ` src="/img/${esc(e.image.file)}"` : ''}>
-    <span class="drop-empty">${ICON.img}<b>Add a picture</b><small>Drop an image here, or tap to choose one</small></span>
+    <span class="drop-empty">${ICON.plus}<b>Add a picture</b><small>Drop an image here, or tap to choose one</small></span>
     <span class="drop-change">Change picture</span>
   </label>
   <button type="button" class="link remove-img">Remove picture</button>
@@ -275,29 +273,36 @@ function formHTML(ev) {
 </form>`;
 }
 
-const MARKS = '<i class="cm tl"></i><i class="cm tr"></i><i class="cm bl"></i><i class="cm br"></i>';
+const two = (n) => String(n).padStart(2, '0');
 
 function eventCard(ev, url) {
   const d = fmtDate(ev.date);
   const time = fmtTime(ev);
+  const m = Number(ev.date.slice(5, 7));
   const cover = ev.image
-    ? `<figure class="cover">${MARKS}<img src="/img/${esc(ev.image.file)}" alt=""></figure>`
-    : `<figure class="cover fb fb${hash(ev.id) % 5}" aria-hidden="true">${MARKS}<span class="fb-top"><b>${esc(d.month)}</b>${esc(d.weekday)}</span><span class="fb-yr">${d.year}</span><span class="fb-num">${d.day}</span></figure>`;
+    ? `<figure class="cover reveal"><img src="/img/${esc(ev.image.file)}" alt="" data-parallax></figure>`
+    : `<figure class="cover fb fb${hash(ev.id) % 4} reveal" aria-hidden="true"><span class="fb-top">${esc(d.month)} ${d.year}<br>${esc(d.weekday)}</span><span class="fb-num" data-parallax>${d.day}</span></figure>`;
   const map = ev.place ? `<a href="https://www.google.com/maps/search/?api=1&amp;query=${encodeURIComponent(ev.place)}" rel="noopener" target="_blank">${esc(ev.place)}</a>` : '';
   return `<article class="event">
-  ${cover}
-  <div class="info">
-    <h1 class="title">${esc(ev.title)}</h1>
-    <dl class="meta">
-      <div class="m-date"><dt>Date</dt><dd><b>${d.day} ${esc(d.mon)}</b><span>${esc(d.long)}</span></dd></div>
-      ${time ? `<div><dt>Time</dt><dd>${esc(time)}</dd></div>` : ''}
-      ${ev.place ? `<div class="m-place"><dt>Place</dt><dd>${map}</dd></div>` : ''}
-      ${ev.hostName ? `<div><dt>Host</dt><dd>${esc(ev.hostName)}</dd></div>` : ''}
-    </dl>
-    ${ev.description ? `<div class="desc">${esc(ev.description)}</div>` : ''}
-    <section id="rsvp" class="rsvp" aria-live="polite"></section>
-    <section id="guests" class="guests" hidden></section>
-    <a class="calendar" href="/e/${esc(ev.id)}/calendar.ics">${ICON.cal}Add to calendar</a>
+  <h1 class="title" data-split>${esc(ev.title)}</h1>
+  <div class="visual">
+    <p class="idx reveal">(${two(d.day)}.${two(m)})</p>
+    ${cover}
+  </div>
+  <div class="body">
+    <section class="details reveal">
+      <h2>Event details</h2>
+      <dl class="meta">
+        <div><dt>Date</dt><dd>${esc(d.long)}</dd></div>
+        ${time ? `<div><dt>Time</dt><dd>${esc(time)}</dd></div>` : ''}
+        ${ev.place ? `<div><dt>Place</dt><dd>${map}</dd></div>` : ''}
+        ${ev.hostName ? `<div><dt>Host</dt><dd>${esc(ev.hostName)}</dd></div>` : ''}
+      </dl>
+    </section>
+    ${ev.description ? `<div class="desc reveal">${esc(ev.description)}</div>` : ''}
+    <section id="rsvp" class="rsvp reveal" aria-live="polite"></section>
+    <section id="guests" class="guests reveal" hidden></section>
+    <a class="calendar reveal" href="/e/${esc(ev.id)}/calendar.ics">Add to calendar ${ICON.arrow}</a>
   </div>
 </article>`;
 }
@@ -307,9 +312,13 @@ const json = (o) => JSON.stringify(o).replace(/</g, '\\u003c');
 function homePage() {
   return layout({
     title: `New event · ${SITE}`, page: 'home',
-    body: `<main class="wrap narrow">
-  <h1 class="page-title">New event</h1>
-  <p class="lede">Make the event, send the link to the people you want there, and watch the replies come in. Guests need no account.</p>
+    body: `<main class="wrap split">
+  <div class="intro">
+    <p class="idx">(00)</p>
+    <h1 class="page-title" data-split>New event</h1>
+    <p class="lede reveal">Make the event, send the link to the people you want there, and watch the replies come in. Guests need no account.</p>
+  </div>
+  <div class="col">
   ${formHTML(null)}
   <section class="mine" hidden>
     <div class="mine-head"><h2>Your events</h2><button class="btn ghost danger small" type="button" id="del-past" hidden>Delete all past events</button></div>
@@ -320,6 +329,7 @@ function homePage() {
     <h2 id="del-title">Delete this event?</h2><p id="del-text">The event, its picture and all replies will be removed. This can't be undone.</p>
     <div class="actions"><button class="btn ghost" value="cancel">Keep</button><button class="btn primary danger" value="delete">Delete</button></div>
   </form></dialog>
+  </div>
 </main>`,
   });
 }
@@ -383,7 +393,7 @@ function aboutPage(base) {
   return layout({
     title: `How it works · ${SITE}`, page: 'about',
     body: `<main class="wrap narrow about">
-  <h1 class="page-title">How it works</h1>
+  <h1 class="page-title" data-split>How it works</h1>
   <p class="lede">A simple way to invite people to something and see who's coming. No accounts, no feed, no algorithm.</p>
 
   <h2>If you're hosting</h2>
@@ -489,7 +499,7 @@ function readJson(req, limit) {
 }
 
 const STATIC = { 'styles.css': 'text/css; charset=utf-8', 'app.js': 'text/javascript; charset=utf-8', 'theme.js': 'text/javascript; charset=utf-8', 'icon.svg': 'image/svg+xml',
-  'fonts/archivo-latin.woff2': 'font/woff2', 'fonts/archivo-latin-ext.woff2': 'font/woff2', 'fonts/OFL.txt': 'text/plain; charset=utf-8' };
+  'fonts/inter-latin.woff2': 'font/woff2', 'fonts/inter-latin-ext.woff2': 'font/woff2', 'fonts/OFL.txt': 'text/plain; charset=utf-8' };
 const IMG_TYPES = { jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
 
 async function route(req, res) {
