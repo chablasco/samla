@@ -249,7 +249,8 @@ dialog p { color: var(--muted); }
 .foot-nav { display: none; width: 100%; gap: 8px; padding-bottom: 14px; margin-bottom: 4px; border-bottom: 1px solid var(--hair); }
 .foot-nav a { flex: 1; display: inline-flex; align-items: center; justify-content: center; min-height: 48px; border: 1px solid var(--ink); border-radius: 999px; font-size: 15px; font-weight: 500; text-decoration: none; }
 .foot-nav a[aria-current] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-.footer .credit-line a { text-decoration: none; background: linear-gradient(var(--accent), var(--accent)) 0 100% / 100% 35% no-repeat; }
+.footer .credit-line a { text-decoration: none; background: none; }
+.footer .credit-line a:hover { color: var(--muted); }
 
 /* ---------- motion (only when scripts run and the device allows motion) ---------- */
 .motion .reveal { opacity: 0; transform: translateY(28px); transition: opacity 1s var(--ease), transform 1s var(--ease); transition-delay: var(--d, 0s); }
