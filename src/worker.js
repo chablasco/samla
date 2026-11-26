@@ -66,15 +66,8 @@ function d1Store(db) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-
-    // Pictures never change (a new picture gets a new name), so keep them in Cloudflare's cache.
-    const isImage = request.method === 'GET' && url.pathname.startsWith('/img/');
-    const cache = typeof caches !== 'undefined' ? caches.default : null;
-    if (isImage && cache) {
-      const hit = await cache.match(request);
-      if (hit) return hit;
-    }
-
+    // Pictures are read straight from the database every time (no copy is kept on Cloudflare's
+    // servers), so a deleted event's picture is really gone.
     await ensureSchema(env.DB);
     const app = createApp({
       siteName: env.SITE_NAME,
@@ -92,8 +85,6 @@ export default {
       return res;
     });
 
-    const response = await app(request);
-    if (isImage && cache && response.status === 200) ctx.waitUntil(cache.put(request, response.clone()));
-    return response;
+    return app(request);
   },
 };
