@@ -224,7 +224,7 @@ function layout({ title, page, body, head = '' }) {
 <script src="/static/theme.js?v=4"></script>
 <link rel="icon" href="/static/icon.svg?v=4" type="image/svg+xml">
 <link rel="preload" href="/static/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/styles.css?v=4">
+<link rel="stylesheet" href="/static/styles.css?v=5">
 ${head}
 </head>
 <body data-page="${page}">
