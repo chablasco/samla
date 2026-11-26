@@ -224,18 +224,18 @@ function layout({ title, page, body, head = '' }) {
 <script src="/static/theme.js?v=4"></script>
 <link rel="icon" href="/static/icon.svg?v=4" type="image/svg+xml">
 <link rel="preload" href="/static/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/styles.css?v=5">
+<link rel="stylesheet" href="/static/styles.css?v=6">
 ${head}
 </head>
 <body data-page="${page}">
 <header class="top">
   <div class="brand"><a class="mark" href="/" aria-label="${esc(SITE)}">${esc(SITE_SHORT)}</a>${SITE_TAG ? `<span class="tag">${esc(SITE_TAG)}</span>` : ''}</div>
   <nav class="nav" aria-label="Main"><a href="/"${page === 'home' ? ' aria-current="page"' : ''}>New event</a><a href="/about"${page === 'about' ? ' aria-current="page"' : ''}>How it works</a></nav>
-  <div class="right">${CREDIT ? `<span class="credit">${creditHTML()}</span>` : ''}${THEME_BTN}</div>
+  <div class="right">${THEME_BTN}</div>
 </header>
 ${body}
 <footer class="footer">
-  <span>${esc(SITE)}</span><span>No tracking, no cookies, no ads. <a href="/about#privacy">What is stored</a></span>${CREDIT ? `<span>${creditHTML()}</span>` : ''}
+  <span>${esc(SITE)}</span><span>No tracking, no cookies, no ads. <a href="/about#privacy">What is stored</a></span>${CREDIT ? `<span class="credit-line">${creditHTML()}</span>` : ''}
 </footer>
 <script src="/static/app.js?v=4" defer></script>
 </body>
@@ -273,20 +273,19 @@ function formHTML(ev) {
 </form>`;
 }
 
-const two = (n) => String(n).padStart(2, '0');
-
 function eventCard(ev, url) {
   const d = fmtDate(ev.date);
   const time = fmtTime(ev);
-  const m = Number(ev.date.slice(5, 7));
   const cover = ev.image
     ? `<figure class="cover reveal"><img src="/img/${esc(ev.image.file)}" alt="" data-parallax></figure>`
     : `<figure class="cover fb fb${hash(ev.id) % 4} reveal" aria-hidden="true"><span class="fb-top">${esc(d.month)} ${d.year}<br>${esc(d.weekday)}</span><span class="fb-num" data-parallax>${d.day}</span></figure>`;
   const map = ev.place ? `<a href="https://www.google.com/maps/search/?api=1&amp;query=${encodeURIComponent(ev.place)}" rel="noopener" target="_blank">${esc(ev.place)}</a>` : '';
   return `<article class="event">
-  <h1 class="title" data-split>${esc(ev.title)}</h1>
+  <header class="ev-head">
+    <p class="when reveal"><time datetime="${esc(ev.date)}${ev.time ? 'T' + esc(ev.time) : ''}">${esc(d.long)}${time ? ` · ${esc(time)}` : ''}</time></p>
+    <h1 class="title" data-split>${esc(ev.title)}</h1>
+  </header>
   <div class="visual">
-    <p class="idx reveal">(${two(d.day)}.${two(m)})</p>
     ${cover}
   </div>
   <div class="body">
@@ -314,7 +313,6 @@ function homePage() {
     title: `New event · ${SITE}`, page: 'home',
     body: `<main class="wrap split">
   <div class="intro">
-    <p class="idx">(00)</p>
     <h1 class="page-title" data-split>New event</h1>
     <p class="lede reveal">Make the event, send the link to the people you want there, and watch the replies come in. Guests need no account.</p>
   </div>
