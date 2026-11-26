@@ -1,0 +1,21 @@
+# Cloudflare settings for samla. See README.md, "Put it online with Cloudflare".
+name = "samla"
+main = "src/worker.js"
+compatibility_date = "2025-06-01"
+
+# The files in public/ (styles, scripts, fonts, icon) are served by Cloudflare as they are.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# Events, replies and pictures. On the first `npx wrangler deploy`, Wrangler creates
+# this database in your Cloudflare account by itself (and may add its id below).
+[[d1_databases]]
+binding = "DB"
+database_name = "samla"
+
+# Optional: change the name and credit line, or set the public address.
+# [vars]
+# SITE_NAME = "samla: the f*ck facebook event app"
+# SITE_CREDIT = "created by Cha Blasco"
+# SITE_CREDIT_URL = "https://chablasco.com"

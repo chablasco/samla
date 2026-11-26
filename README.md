@@ -20,11 +20,44 @@ Replace the app folder with the new version and start it again. Events are store
 (in a `data` folder inside a `samla...` folder next to the app) are copied over automatically
 on start.
 
+## Put it online with Cloudflare (recommended)
+
+This gives the app a public address, like `https://samla.YOUR-NAME.workers.dev`, that works on
+every phone. It runs on Cloudflare's free Workers plan; events, replies and pictures are kept in a
+Cloudflare D1 database that is created for you. There is no server to look after.
+
+You need: Node 18 or newer (see below) and a free Cloudflare account (https://dash.cloudflare.com/sign-up).
+
+1. Open a terminal in the `samla` folder.
+2. Sign in to Cloudflare (a browser window opens; click Allow):
+   ```
+   npx wrangler login
+   ```
+3. Put it online:
+   ```
+   npx wrangler deploy
+   ```
+   The first time, Cloudflare may ask you to pick a `workers.dev` name for your account.
+   Wrangler also creates the `samla` database. When it finishes it prints your address,
+   for example `https://samla.cha.workers.dev`. Open it on any phone.
+4. To update later, download the new version and run `npx wrangler deploy` again in its folder.
+   Your events stay in the database.
+
+Optional:
+- **Your own address** such as `events.chablasco.com`: in the Cloudflare dashboard open
+  Workers & Pages, then samla, then Settings, then Domains & Routes, and add a custom domain.
+  The domain's DNS must be managed by Cloudflare for this.
+- **Change the name or credit line:** uncomment the `[vars]` lines in `wrangler.toml` and deploy again.
+- **Try it locally the Cloudflare way:** `npx wrangler dev`.
+
+Free plan limits that matter here: 100,000 requests a day, and a 500 MB database (pictures are
+resized to well under 2 MB each before upload). For a group of friends that is far more than enough.
+
 ## Let others use it
 
 There are two ways:
 
-- **Share your copy:** once it is online, anyone can open the address and create their own events.
+- **Share your copy:** once it is online (see Cloudflare above), anyone can open the address and create their own events.
   The "How it works" page (`/about`) explains it to both hosts and guests.
 - **Give them their own copy:** they download it from https://github.com/chablasco/samla
   (green Code button, then Download ZIP). They follow "Run it locally" below, and can
@@ -74,7 +107,7 @@ Settings (environment variables):
 | `SITE_CREDIT_URL` | `https://chablasco.com` | Where that link goes |
 | `SITE_CREDIT_URL` | `https://chablasco.com` | The name after "by " links here (set empty for no link) |
 
-## Put it on your server (Ubuntu + nginx)
+## Or run it on your own server (Ubuntu + nginx)
 
 ```
 # copy the folder to the server, then:
