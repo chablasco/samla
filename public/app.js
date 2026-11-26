@@ -139,10 +139,7 @@
   const root = document.documentElement;
   const top = $('.top');
   const onScroll = () => { if (top) top.classList.toggle('scrolled', window.scrollY > 8); };
-  // The header's height, so pictures on phones can fill exactly the rest of the screen
-  const setTopH = () => { if (top) root.style.setProperty('--top-h', top.offsetHeight + 'px'); };
-  setTopH();
-  window.addEventListener('resize', setTopH);
+
   onScroll();
 
   if (root.classList.contains('motion')) {
@@ -187,7 +184,9 @@
   function parallax() {
     ticking = false;
     const vh = window.innerHeight;
+    const phone = window.matchMedia('(max-width: 600px)').matches; // on phones the whole picture is shown, so it doesn't drift
     drift.forEach((el) => {
+      if (phone && el.tagName === 'IMG') { el.style.transform = ''; return; }
       const r = el.parentElement.getBoundingClientRect();
       if (r.bottom < 0 || r.top > vh) return;
       const p = ((r.top + r.height / 2) - vh / 2) / vh; // -1 .. 1 around the middle of the screen

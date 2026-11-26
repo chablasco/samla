@@ -43,14 +43,16 @@ h3 { font-size: 14px; color: var(--muted); margin: 22px 0 8px; }
 svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 
 /* ---------- header ---------- */
-.top { position: sticky; top: 0; z-index: 10; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px;
+.top { position: sticky; top: 0; z-index: 10; display: grid; grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "brand nav right"; align-items: center; gap: 6px 14px;
   padding: 12px var(--pad); background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(10px);
   border-bottom: 1px solid transparent; transition: border-color .3s; }
 .top.scrolled { border-bottom-color: var(--hair); }
 .brand { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 10px; }
 .mark { font-weight: 650; font-size: 19px; letter-spacing: -0.03em; text-decoration: none; }
 .tag { color: var(--accent); font-size: 14px; font-weight: 600; }
-.nav { display: flex; gap: 4px; }
+.brand { grid-area: brand; }
+.nav { grid-area: nav; display: flex; gap: 4px; justify-content: flex-end; }
+.right { grid-area: right; }
 .nav a { color: var(--muted); font-weight: 500; font-size: 15px; text-decoration: none; padding: 10px 8px; min-height: 44px; display: inline-flex; align-items: center; transition: color .2s; }
 .nav a:hover, .nav a[aria-current] { color: var(--ink); }
 .right { display: flex; justify-content: flex-end; align-items: center; gap: 14px; }
@@ -267,10 +269,13 @@ dialog p { color: var(--muted); }
 }
 /* ---------- phones ---------- */
 @media (max-width: 700px) {
-  .top { grid-template-columns: 1fr auto; }
-  .nav { grid-column: 1 / -1; grid-row: 2; margin: -6px 0 -8px -8px; }
-  .brand { column-gap: 8px; }
-  .tag { font-size: 13px; }
+  /* Phones: samla, the links and the light/dark button on the top row; the yellow tagline just under */
+  .top { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "mark nav right" "tag tag tag"; column-gap: 8px; row-gap: 0; padding-top: 8px; padding-bottom: 8px; }
+  .brand { display: contents; }
+  .mark { grid-area: mark; }
+  .tag { grid-area: tag; font-size: 13px; margin-top: -4px; }
+  .nav { gap: 0; }
+  .nav a { padding: 10px 6px; font-size: 14px; }
   .footer { flex-direction: column; }
 }
 @media (max-width: 600px) {
@@ -278,8 +283,9 @@ dialog p { color: var(--muted); }
   .row3 .field:first-child { grid-column: 1 / -1; }
   .copy-row { flex-direction: column; align-items: stretch; }
   .cover { margin: 0 calc(-1 * var(--pad)); }
-  /* On phones the picture fills the screen below the header */
-  .visual .cover { aspect-ratio: auto; height: calc(100svh - var(--top-h, 100px)); min-height: 380px; }
+  /* On phones the picture spans the full screen width and keeps its own proportions (nothing cut off) */
+  .visual .cover:not(.fb) { aspect-ratio: auto; height: auto; }
+  .visual .cover:not(.fb) img { height: auto; transform: none !important; }
   .mine li a, .mine li.gone { grid-template-columns: 5.2em minmax(0, 1fr) auto; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } html { scroll-behavior: auto; } }
