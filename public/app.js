@@ -122,20 +122,63 @@
     if (!hostField.value) hostField.value = store.get('samla:name', '');
     setupForm(form, {});
     const mineList = $('#mine');
+    const pastBtn = $('#del-past');
+    const dlg = $('#del-dialog');
+    const pad = (n) => String(n).padStart(2, '0');
+    const now = new Date();
+    const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    const isPast = (e) => e.date < today;
+    let pending = [];
+
     function drawMine() {
-      const list = hosted.all();
+      const list = hosted.all().slice().sort((a, b) => (isPast(a) - isPast(b)) || (isPast(a) ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date)));
       $('.mine').hidden = !list.length;
+      const past = list.filter((e) => isPast(e) && !e.missing);
+      pastBtn.hidden = !past.length;
+      pastBtn.textContent = past.length === 1 ? 'Delete the past event' : `Delete all ${past.length} past events`;
       mineList.innerHTML = list.map((e) => e.missing
         ? `<li class="gone"><span class="d">${esc(shortDate(e.date))}</span><span><b>${esc(e.title)}</b><small>Not found on this server. It was deleted, or saved by an older copy of the app.</small></span><button class="link" type="button" data-forget="${esc(e.id)}">Remove</button></li>`
-        : `<li><a href="/h/${encodeURIComponent(e.id)}/${encodeURIComponent(e.key)}"><span class="d">${esc(shortDate(e.date))}</span><b>${esc(e.title)}</b></a></li>`).join('');
+        : `<li class="${isPast(e) ? 'past' : ''}"><a href="/h/${encodeURIComponent(e.id)}/${encodeURIComponent(e.key)}"><span class="d">${esc(shortDate(e.date))}</span><b>${esc(e.title)}</b>${isPast(e) ? '<span class="tag-past">Past</span>' : ''}</a><button class="link danger" type="button" data-del="${esc(e.id)}" aria-label="Delete ${esc(e.title)}">Delete</button></li>`).join('');
       $$('[data-forget]', mineList).forEach((b) => b.addEventListener('click', () => { hosted.drop(b.dataset.forget); drawMine(); }));
+      $$('[data-del]', mineList).forEach((b) => b.addEventListener('click', () => {
+        const ev = hosted.all().find((x) => x.id === b.dataset.del);
+        if (!ev) return;
+        pending = [ev];
+        $('#del-title').textContent = `Delete “${ev.title}”?`;
+        $('#del-text').textContent = 'The event, its picture and all replies will be removed from the server. This can’t be undone.';
+        dlg.showModal();
+      }));
     }
+
+    pastBtn.addEventListener('click', () => {
+      pending = hosted.all().filter((e) => isPast(e) && !e.missing);
+      if (!pending.length) return;
+      $('#del-title').textContent = pending.length === 1 ? 'Delete the past event?' : `Delete ${pending.length} past events?`;
+      $('#del-text').textContent = 'These events, their pictures and all replies will be removed from the server. This can’t be undone.';
+      dlg.showModal();
+    });
+
+    dlg.addEventListener('close', async () => {
+      if (dlg.returnValue !== 'delete' || !pending.length) return;
+      const todo = pending; pending = [];
+      for (const e of todo) {
+        try {
+          const r = await fetch(`/api/events/${encodeURIComponent(e.id)}`, { method: 'DELETE', headers: { 'X-Host-Key': e.key } });
+          if (r.ok || r.status === 404) hosted.drop(e.id);
+        } catch { /* keep it in the list so it can be tried again */ }
+      }
+      drawMine();
+    });
+
     drawMine();
-    // Check that each remembered event still exists on this server
+    // Check that each remembered event still exists, and pick up any edits to name or date
     Promise.all(hosted.all().map(async (e) => {
       try {
         const r = await fetch(`/api/events/${encodeURIComponent(e.id)}`, { headers: { 'X-Host-Key': e.key } });
-        return { ...e, missing: r.status === 404 };
+        if (r.status === 404) return { ...e, missing: true };
+        if (!r.ok) return e;
+        const d = await r.json();
+        return { ...e, title: d.title, date: d.date, missing: false };
       } catch { return e; }
     })).then((checked) => { store.set('samla:hosted', checked); drawMine(); });
   }
