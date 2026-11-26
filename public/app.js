@@ -113,6 +113,68 @@
     try { localStorage.setItem('theme', next); } catch { /* storage blocked */ }
   }));
 
+  // ---------- motion ----------
+  const root = document.documentElement;
+  const top = $('.top');
+  const onScroll = () => { if (top) top.classList.toggle('scrolled', window.scrollY > 8); };
+  onScroll();
+
+  if (root.classList.contains('motion')) {
+    root.classList.add('motion-ready');
+    // Titles rise word by word
+    $$('[data-split]').forEach((el) => {
+      const words = el.textContent.trim().split(/\s+/);
+      el.setAttribute('aria-label', el.textContent.trim());
+      el.textContent = '';
+      words.forEach((word, i) => {
+        const w = document.createElement('span'); w.className = 'w'; w.setAttribute('aria-hidden', 'true');
+        const inner = document.createElement('span'); inner.textContent = word; inner.style.setProperty('--i', i);
+        w.appendChild(inner); el.appendChild(w);
+        if (i < words.length - 1) el.appendChild(document.createTextNode(' '));
+      });
+      requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('in')));
+    });
+    // Blocks fade up as they scroll into view, a little staggered
+    // A picture that starts fully clipped counts as invisible to the browser, so watch its container instead.
+    const watched = new Map();
+    const io = new IntersectionObserver((entries) => {
+      let n = 0;
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        (watched.get(e.target) || []).forEach((el) => {
+          el.style.setProperty('--d', `${Math.min(n++, 4) * 90}ms`);
+          el.classList.add('in');
+        });
+        io.unobserve(e.target);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+    $$('.reveal').forEach((el) => {
+      const target = el.classList.contains('cover') ? el.parentElement : el;
+      if (!watched.has(target)) { watched.set(target, []); io.observe(target); }
+      watched.get(target).push(el);
+    });
+  }
+
+  // Pictures drift slowly while scrolling (parallax)
+  const drift = $$('[data-parallax]');
+  let ticking = false;
+  function parallax() {
+    ticking = false;
+    const vh = window.innerHeight;
+    drift.forEach((el) => {
+      const r = el.parentElement.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > vh) return;
+      const p = ((r.top + r.height / 2) - vh / 2) / vh; // -1 .. 1 around the middle of the screen
+      el.style.transform = el.tagName === 'IMG' ? `scale(1.08) translateY(${(p * -4).toFixed(2)}%)` : `translateY(${(p * -18).toFixed(1)}px)`;
+    });
+  }
+  const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  window.addEventListener('scroll', () => {
+    onScroll();
+    if (!still && drift.length && !ticking) { ticking = true; requestAnimationFrame(parallax); }
+  }, { passive: true });
+  if (!still && drift.length) parallax();
+
   const page = document.body.dataset.page;
 
   // ---------- home ----------
