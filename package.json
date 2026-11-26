@@ -1,0 +1,9 @@
+{
+  "name": "samla",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Simple, design-focused events with link invites and Going / Can't go replies",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" }
+}
