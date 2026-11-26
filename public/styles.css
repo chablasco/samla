@@ -246,6 +246,9 @@ dialog p { color: var(--muted); }
 /* ---------- footer ---------- */
 .footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; padding: 22px var(--pad) 28px; border-top: 1px solid var(--hair); color: var(--muted); font-size: 13px; }
 .footer a { color: var(--ink); }
+.foot-nav { display: none; width: 100%; gap: 8px; padding-bottom: 14px; margin-bottom: 4px; border-bottom: 1px solid var(--hair); }
+.foot-nav a { flex: 1; display: inline-flex; align-items: center; justify-content: center; min-height: 48px; border: 1px solid var(--ink); border-radius: 999px; font-size: 15px; font-weight: 500; text-decoration: none; }
+.foot-nav a[aria-current] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .footer .credit-line a { text-decoration: none; background: linear-gradient(var(--accent), var(--accent)) 0 100% / 100% 35% no-repeat; }
 
 /* ---------- motion (only when scripts run and the device allows motion) ---------- */
@@ -269,13 +272,12 @@ dialog p { color: var(--muted); }
 }
 /* ---------- phones ---------- */
 @media (max-width: 700px) {
-  /* Phones: samla, the links and the light/dark button on the top row; the yellow tagline just under */
-  .top { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "mark nav right" "tag tag tag"; column-gap: 8px; row-gap: 0; padding-top: 8px; padding-bottom: 8px; }
-  .brand { display: contents; }
-  .mark { grid-area: mark; }
-  .tag { grid-area: tag; font-size: 13px; margin-top: -4px; }
-  .nav { gap: 0; }
-  .nav a { padding: 10px 6px; font-size: 14px; }
+  /* Phones: samla, the yellow tagline and the light/dark button on top; the links move to the bottom of the page */
+  .top { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "brand right"; column-gap: 8px; padding-top: 8px; padding-bottom: 8px; }
+  .top .nav { display: none; }
+  .brand { column-gap: 8px; row-gap: 0; }
+  .tag { font-size: 13px; }
+  .foot-nav { display: flex; }
   .footer { flex-direction: column; }
 }
 @media (max-width: 600px) {
